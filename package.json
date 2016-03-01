@@ -1,0 +1,31 @@
+{
+  "name": "ramfs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "ramfs-load": "./bin/ramfs-load",
+    "ramfs-create": "./bin/ramfs-create",
+    "ramfs-list": "./bin/ramfs-list"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arunoda/ramfs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arunoda/ramfs/issues"
+  },
+  "homepage": "https://github.com/arunoda/ramfs#readme",
+  "dependencies": {
+    "keypress": "^0.2.1",
+    "moment": "^2.11.2",
+    "shelljs": "^0.6.0",
+    "watch": "^0.17.1"
+  }
+}

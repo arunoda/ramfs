@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const shell = require('shelljs');
+
+if (fs.existsSync('/Volumes/myram')) {
+  console.error('There is an existing RAM disk');
+  process.exit(-1);
+}
+
+shell.exec("diskutil erasevolume HFS+ 'myram' `hdiutil attach -nomount ram://8388608`")

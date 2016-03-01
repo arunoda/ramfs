@@ -1,0 +1,108 @@
+#!/usr/bin/env node
+
+const shell = require('shelljs');
+const resolve = require('path').resolve;
+const fs = require('fs');
+const moment = require('moment');
+const keypress = require('keypress');
+keypress(process.stdin);
+
+const RAMFS_LOCATION = '/Volumes/myram';
+const SNAPSHOT_LOCATION = '/data/opt/ramfs/snapshots';
+const BACKUP_TIMEOUT = 1000 * 60 * 5; // 5 min.
+var BACKING_UP = false;
+
+const source = process.argv[2];
+if (!source) {
+  console.error('A source required to watch');
+  process.exit(-1);
+}
+
+if (!process.argv[3]) {
+  console.error('dirname(s) to load is required');
+  process.exit(-1);
+}
+
+const dirNames = process.argv[3].split(',').map(f => f.trim());
+const sourcePath = resolve(RAMFS_LOCATION, source);
+const snapshotPath = resolve(SNAPSHOT_LOCATION, source);
+
+shell.mkdir('-p', sourcePath);
+shell.mkdir('-p', snapshotPath);
+shell.cd(sourcePath);
+
+restoreAll();
+backupAll();
+handleCtrlB();
+
+function handleCtrlB() {
+  process.stdin.on('keypress', function (ch, key) {
+    // support killing
+    if (key && key.ctrl && key.name == 'c') {
+      if (BACKING_UP) {
+        console.log('Wait until backup is completed!');
+        return;
+      }
+
+      process.exit(0);
+    }
+
+    if (key && key.ctrl && key.name == 'b') {
+      const once = true;
+      backupAll(once);
+    }
+  });
+
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+}
+
+function restoreAll() {
+  dirNames.forEach(dir => restoreDir(dir));
+}
+
+function backupAll(onlyOnce) {
+  if (BACKING_UP) {
+    console.log('Wait until backup is completed!');
+    return;
+  }
+
+  BACKING_UP = true;
+  console.log();
+  dirNames.forEach(dir => backupDir(dir));
+  console.log();
+  BACKING_UP = false;
+
+  if (onlyOnce) {
+    return;
+  }
+
+  setTimeout(backupAll, BACKUP_TIMEOUT);
+}
+
+function backupDir(dirname) {
+  const startAt = new Date();
+  const startTime = moment(startAt).format('h:mm:ss a');
+
+  process.stdout.write(`backing up "${dirname}" at ${startTime}`);
+  const tarBallName = `${dirname}.tar.gz`;
+  shell.exec(`tar cf ${tarBallName} ${dirname}`);
+  shell.cp(tarBallName, resolve(snapshotPath, tarBallName));
+  shell.rm(tarBallName);
+
+  const takenSecs = Math.ceil((Date.now() - startAt.getTime()) / 1000);
+  process.stdout.write(` - took ${takenSecs} secs.\n`);
+}
+
+function restoreDir(dirname) {
+  const tarBallName = `${dirname}.tar.gz`;
+  const snapshotTarBallPath = resolve(snapshotPath, tarBallName);
+  if (!fs.existsSync(snapshotTarBallPath)) {
+    return;
+  }
+
+  console.log(`restoring ${dirname}`);
+  shell.cp(resolve(snapshotPath, tarBallName), tarBallName);
+  shell.exec(`tar xf ${tarBallName}`);
+  shell.rm(tarBallName);
+}

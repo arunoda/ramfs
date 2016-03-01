@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+const shell = require('shelljs');
+const resolve = require('path').resolve;
+const fs = require('fs');
+const moment = require('moment');
+const keypress = require('keypress');
+keypress(process.stdin);
+
+const RAMFS_LOCATION = '/Volumes/myram';
+const SNAPSHOT_LOCATION = '/data/opt/ramfs/snapshots';
+const BACKUP_TIMEOUT = 1000 * 60 * 5; // 5 min.
+var BACKING_UP = false;
+
+const source = process.argv[2];
+if (!source) {
+  console.error('A source required to watch');
+  process.exit(-1);
+}
+
+const dirNames =
+  fs.readdirSync(resolve(SNAPSHOT_LOCATION, source))
+    .map(file => file.replace('.tar.gz', ''));
+dirNames.forEach(dir => console.log(` ${dir}`));
