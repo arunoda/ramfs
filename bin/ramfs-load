@@ -9,7 +9,7 @@ keypress(process.stdin);
 
 const RAMFS_LOCATION = '/Volumes/myram';
 const SNAPSHOT_LOCATION = '/data/opt/ramfs/snapshots';
-const BACKUP_TIMEOUT = 1000 * 60 * 5; // 5 min.
+const BACKUP_TIMEOUT = 1000 * 60 * 1; // 1 min.
 var BACKING_UP = false;
 
 const source = process.argv[2];
