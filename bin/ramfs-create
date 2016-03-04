@@ -10,4 +10,5 @@ if (fs.existsSync('/Volumes/ramfs')) {
   process.exit(-1);
 }
 
-shell.exec("diskutil erasevolume HFS+ 'ramfs' `hdiutil attach -nomount ram://${GBSIZE * 2048}`")
+const ramSize = GBSIZE * 1024 * 2048;
+shell.exec("diskutil erasevolume HFS+ 'ramfs' `hdiutil attach -nomount ram://" + ramSize + "`");
