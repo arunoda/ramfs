@@ -3,9 +3,11 @@
 const fs = require('fs');
 const shell = require('shelljs');
 
-if (fs.existsSync('/Volumes/myram')) {
+const GBSIZE = process.argv[2] ? parseInt(process.argv[2]) || 1 : 1;
+
+if (fs.existsSync('/Volumes/ramfs')) {
   console.error('There is an existing RAM disk');
   process.exit(-1);
 }
 
-shell.exec("diskutil erasevolume HFS+ 'myram' `hdiutil attach -nomount ram://8388608`")
+shell.exec("diskutil erasevolume HFS+ 'ramfs' `hdiutil attach -nomount ram://${GBSIZE * 2048}`")
